@@ -1,0 +1,11 @@
+user
+
+movieResult
+- pk
+- user
+- imdbID
+- swipe
+- watched
+- myranking
+- mycomments
+
