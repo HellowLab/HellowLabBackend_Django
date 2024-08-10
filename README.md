@@ -34,8 +34,8 @@ Django backend API service for all Hellow Lab products
 2. **Create and activate a virtual environment:**
 
   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
+   python -m venv venv
+   venv/Scripts/activate
   ```
 3. **Install dependencies:**
 
