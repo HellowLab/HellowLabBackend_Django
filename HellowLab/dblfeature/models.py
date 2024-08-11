@@ -4,9 +4,10 @@ from django.conf import settings
 #   Movie results track the result of each swipe a user makes
 class MovieResult(models.Model):
   id = models.AutoField(primary_key=True)
-  user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
+  user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
   tmdb_id = models.CharField(max_length=30)
-  movie_name = models.CharField(max_length=100)
+  name = models.CharField(max_length=100)
+  poster = models.CharField(max_length=100, null=True)
   liked = models.BooleanField()
   swipeDate = models.DateTimeField(auto_now_add=True)
   watched = models.BooleanField(default=False)
