@@ -16,8 +16,6 @@ class MovieResultView(APIView):
 
     # POST request to add a new movie result
     def post(self, request):
-        user = self.request.user
-        print("user: ", user)
         serializer = MovieResultSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(user=self.request.user)
@@ -25,10 +23,8 @@ class MovieResultView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request, *args, **kwargs):
-        print("GET request: ", request)
         # Extract userID from query parameters, if none is sent then user the authorized users ID
         user_id = request.query_params.get('userID') or self.request.user.id
-        print("user_id: ", user_id)
         if not user_id:
             return Response({"error": "userID is required."}, status=status.HTTP_400_BAD_REQUEST)
         
