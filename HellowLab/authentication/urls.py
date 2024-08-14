@@ -1,6 +1,6 @@
 # authentication/urls.py
 
-from authentication.views import email_confirm_redirect, password_reset_confirm_redirect
+from authentication.views import email_confirm_redirect, password_reset_confirm_redirect, FriendshipView
 from dj_rest_auth.registration.views import (ResendEmailVerificationView,VerifyEmailView,)
 from dj_rest_auth.views import (PasswordResetConfirmView, PasswordResetView, )
 from dj_rest_auth.jwt_auth import get_refresh_view
@@ -24,4 +24,6 @@ urlpatterns = [
     path("password/reset/confirm/<str:uidb64>/<str:token>/",password_reset_confirm_redirect,name="password_reset_confirm",
     ),
     path("password/reset/confirm/", PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+
+    path("friendrequest/", FriendshipView.as_view(), name="friend_request"),
 ]
