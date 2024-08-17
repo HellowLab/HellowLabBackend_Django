@@ -42,10 +42,11 @@ class MovieResultView(APIView):
 
     # PUT request to update a movie result
     def put(self, request):
-        # Extract the movie result ID from the query parameters
-        movie_result_id = request.query_params.get('movie_result_id')
+        # Extract the movie result ID from the request data
+        movie_result_id = request.data.get('id')
+
         if not movie_result_id:
-            return Response({"error": "movie_result_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "id is required."}, status=status.HTTP_400_BAD_REQUEST)
         
         # Fetch the movie result based on the movie_result_id
         movie_result = get_object_or_404(MovieResult, id=movie_result_id)

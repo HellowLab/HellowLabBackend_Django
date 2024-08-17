@@ -1,0 +1,39 @@
+
+version: '3'
+services:
+  django:
+    container_name: django_hellowlab
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    # volumes: # Uncomment this if you want to overwrite the existing app folder with your local app folder
+    #   - .:/app
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=True
+      - DJANGO_DB_HOST=db
+      - DJANGO_DB_PORT=5432
+      - DJANGO_DB_NAME=tags_db
+      - DJANGO_DB_USER=admin
+      - DJANGO_DB_PASSWORD=password
+    restart: unless-stopped
+  db:
+    container_name: django_hellowlab_db
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=tags_db
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: my_network
+    external: true
