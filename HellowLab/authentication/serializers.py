@@ -47,12 +47,10 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         return attrs
 
 class FriendshipSerializer(serializers.ModelSerializer):
-    print("friendship serializer")
     user1 = serializers.ReadOnlyField(source='user1.username')
     # user2 = serializers.ReadOnlyField(source='user2.username')
 
     class Meta:
-        print("friendship meta")
         model = Friendship
         fields = '__all__'
         # read_only_fields = ['user1', 'user2']

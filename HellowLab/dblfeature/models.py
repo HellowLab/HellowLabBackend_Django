@@ -4,9 +4,9 @@ from django.conf import settings
 #   Movie results track the result of each swipe a user makes
 class MovieResult(models.Model):
   LIKE_CHOICES = [
-    (0, "None"),
+    (0, "Disliked"),
     (1, "Liked"),
-    (2, "Disliked")
+    (2, "Empty")
   ]
   id = models.AutoField(primary_key=True)
   user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -16,7 +16,7 @@ class MovieResult(models.Model):
   liked = models.PositiveIntegerField(choices=LIKE_CHOICES,default=0)
   swipeDate = models.DateTimeField(auto_now_add=True)
   watched = models.BooleanField(default=False)
-  myRanking = models.FloatField(null=True, blank=True)
+  myRating = models.FloatField(default=0, null=True, blank=True)
   myComments = models.CharField(max_length=500, null=True, blank=True)
 
   def __str__(self):

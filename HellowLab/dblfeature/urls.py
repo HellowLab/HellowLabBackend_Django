@@ -7,6 +7,7 @@ from .views import *
 urlpatterns = [
     # update movie result
     path('movieresult/', MovieResultView.as_view(), name='movie_result'),
+    path('singlemovieresult/', SingleMovieView.as_view(), name='single_movie_result')
     # path('update_user_data/', update_user_data, name='update_user_data'),
     # path('myuser', get_my_user, name='get_my_user'),
 
