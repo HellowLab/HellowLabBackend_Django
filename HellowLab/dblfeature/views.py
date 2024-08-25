@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-
+import datetime
 from .serializers import * # import all of my serializers
 from .models import * # import all of my models
 
@@ -115,3 +115,63 @@ class SingleMovieView(APIView):
         except:
             return Response({"error": "Error saving data."}, status=status.HTTP_400_BAD_REQUEST)
 
+# get tmdb index
+class TmdbIndexView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        # get User ID for the authorized user
+        user_id =  self.request.user.id
+        if not user_id:
+            return Response({"error": "userID is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Fetch the user based on the userID using the custom user model
+        user = get_object_or_404(User, id=user_id)
+
+        tmdb_index = get_object_or_404(TmdbIndex, user=user)
+
+        # Check if the query params are set to 'popular'
+
+
+        if self.request.query_params.get('type') == 'popular':
+            # return the value of popular_date and popular_index
+            return Response({"date": tmdb_index.popular_date, "index": tmdb_index.popular_index}, status=status.HTTP_200_OK)
+        
+        # if params don't match any type, return the whole object
+        # Serialize the movie results
+        serializer = TmdbIndexSerializer(tmdb_index)
+        
+        # Return the serialized data as a JSON response
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request):
+        # get User ID for the authorized user
+        user_id =  self.request.user.id
+        if not user_id:
+            return Response({"error": "userID is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Fetch the user based on the userID using the custom user model
+        user = get_object_or_404(User, id=user_id)
+
+        data = request.data.copy()
+        data['popular_date'] = datetime.date.today()  # Add popular_date to the data
+
+        # Fetch the tmdb index object for this user
+        tmdb_index = TmdbIndex.objects.filter(user=user).first()
+
+        # if the object does not exist, create a new one
+        if not tmdb_index:
+            serializer = TmdbIndexSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save(user=user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update the tmdb index with the new data
+        serializer = TmdbIndexSerializer(tmdb_index, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+### END FILE ###

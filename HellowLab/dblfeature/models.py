@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+import datetime
 
 #   Movie results track the result of each swipe a user makes
 class MovieResult(models.Model):
@@ -21,3 +22,8 @@ class MovieResult(models.Model):
 
   def __str__(self):
     return (f"{self.tmdb_id}")
+  
+class TmdbIndex(models.Model):
+  user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+  popular_index = models.IntegerField(default=1)
+  popular_date = models.DateField(default=datetime.date.today, null=True)
