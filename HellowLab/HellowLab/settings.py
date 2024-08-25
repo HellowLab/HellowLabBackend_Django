@@ -172,7 +172,6 @@ SIMPLE_JWT = {
 
 SITE_ID = 1  # make sure SITE_ID is set
 
-
 ACCOUNT_EMAIL_REQUIRED = True # old value false
 ACCOUNT_EMAIL_VERIFICATION = "optional" #old value none
 
@@ -216,8 +215,6 @@ else:
     #     "http://127.0.0.1:3000/",
     #     "http://nextjs_tags:3000/"
     # ]
-
-# AUTH_USER_MODEL = 'authentication.CustomUser'
 
 ACCOUNT_ADAPTER = 'authentication.adapter.DefaultAccountAdapterCustom'
 SITE_NAME = 'HellowLab'

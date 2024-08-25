@@ -20,7 +20,7 @@ services:
       - DJANGO_DB_PASSWORD=password
     restart: unless-stopped
   db:
-    container_name: django_hellowlab_db
+    container_name: django_db_hellowlab
     image: postgres:latest
     volumes:
       - postgres_data:/var/lib/postgresql/data
