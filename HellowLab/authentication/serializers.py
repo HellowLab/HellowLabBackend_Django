@@ -25,8 +25,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
     
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'username', 'pk', 'profile_image', 'company']
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'username', 'pk']
 
 
 class FriendRequestSerializer(serializers.ModelSerializer):

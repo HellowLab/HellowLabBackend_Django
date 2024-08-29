@@ -103,12 +103,12 @@ def update_user_data(request):
         # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': 'No data provided'}, status=400)
 
-@api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_my_user(request):
-    myuser = request.user
-    myuser = CustomUserSerializer(myuser).data    
-    return Response(myuser)
+class MyUserDetailsView(APIView):
+    def get(self, request):
+        user = self.request.user
+        serializer = CustomUserSerializer(user)
+        return Response(serializer.data)
 
 ##### END USER ACCOUNT VIEWS #####
 
