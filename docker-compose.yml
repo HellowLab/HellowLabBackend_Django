@@ -3,7 +3,7 @@ services:
   django:
     container_name: django_hellowlab
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     # volumes: # Uncomment this if you want to overwrite the existing app folder with your local app folder
     #   - .:/app
     ports:
