@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - mango_working_branch
+      - main
 
 jobs:
   deploy:
@@ -22,6 +22,6 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@159.89.227.220 << 'EOF'
             cd HellowLabBackend_Django
-            git pull origin mango_working_branch
+            git pull origin main
             sudo docker compose up -d --build --remove-orphans
           EOF
