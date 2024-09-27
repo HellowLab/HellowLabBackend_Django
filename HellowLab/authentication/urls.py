@@ -1,6 +1,6 @@
 # authentication/urls.py
 
-from authentication.views import email_confirm_redirect, password_reset_confirm_redirect
+from authentication.views import email_confirm_redirect, password_reset_confirm_redirect, FriendshipView
 from dj_rest_auth.registration.views import (ResendEmailVerificationView,VerifyEmailView,)
 from dj_rest_auth.views import (PasswordResetConfirmView, PasswordResetView, )
 from dj_rest_auth.jwt_auth import get_refresh_view
@@ -8,12 +8,14 @@ from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LoginView, LogoutView, UserDetailsView
 from django.urls import path
 from rest_framework_simplejwt.views import TokenVerifyView
+from .views import *
 
 urlpatterns = [
     path("register/", RegisterView.as_view(), name="rest_register"),
     path("login/", LoginView.as_view(), name="rest_login"),
     path("logout/", LogoutView.as_view(), name="rest_logout"),
     path("user/", UserDetailsView.as_view(), name="rest_user_details"),
+    path("myuser/", MyUserDetailsView.as_view(), name="my_user_details"),
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("token/refresh/", get_refresh_view().as_view(), name="token_refresh"),
     path("register/verify-email/", VerifyEmailView.as_view(), name="rest_verify_email"),
@@ -24,4 +26,6 @@ urlpatterns = [
     path("password/reset/confirm/<str:uidb64>/<str:token>/",password_reset_confirm_redirect,name="password_reset_confirm",
     ),
     path("password/reset/confirm/", PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+
+    path("friendrequest/", FriendshipView.as_view(), name="friend_request"),
 ]
