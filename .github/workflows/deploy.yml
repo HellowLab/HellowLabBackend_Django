@@ -23,6 +23,5 @@ jobs:
           ssh -o StrictHostKeyChecking=no root@159.89.227.220 << 'EOF'
             cd HellowLabBackend_Django
             git pull origin mango_working_branch
-            sudo docker compose up -d --build
-            sudo docker compose --remove-orphans
+            sudo docker-compose up -d --build --remove-orphans
           EOF
