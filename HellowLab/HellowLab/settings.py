@@ -21,25 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load environment variables from .env file
 load_dotenv()
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-lyx6a7p7p59(g6j)uia#-i8f26708^q8%_lz*sb7kn)@k(^di!'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-# Check if DEBUG_BOOL environment variable exists
-if 'DEBUG_BOOL' in os.environ:
-    # print("DEBUG_BOOL exists, use its value to set DEBUG")
-    # DEBUG_BOOL exists, use its value to set DEBUG
-    DEBUG = os.environ.get('DEBUG_BOOL').lower() == 'true'
-else:
-    # print("DEBUG_BOOL does not exist, default to True")
-    # DEBUG_BOOL does not exist, default to True
-    DEBUG = True
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-lyx6a7p7p59(g6j)uia#-i8f26708^q8%_lz*sb7kn)@k(^di!')
 
 ALLOWED_HOSTS = ['*']
-
+# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 # Application definition
 
@@ -50,19 +39,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # my apps
-    'dblfeature',
-    # everything below was added
+    
+    # Third-party apps
     "corsheaders",
-    "authentication.apps.AuthenticationConfig", 
-    "rest_framework", 
-    "rest_framework.authtoken", 
-    "rest_framework_simplejwt", 
-    "allauth", 
-    "allauth.account", 
+    "rest_framework",
+    "rest_framework.authtoken",
+    "rest_framework_simplejwt",
+    "allauth",
+    "allauth.account",
     "allauth.socialaccount",  # add if you want social authentication
     "dj_rest_auth",
     "dj_rest_auth.registration",
+
+    # Local apps
+    'dblfeature',
+    "authentication.apps.AuthenticationConfig", 
 ]
 
 MIDDLEWARE = [
@@ -82,9 +73,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'), 
-            os.path.join(BASE_DIR, 'allauth'),
-            os.path.join(BASE_DIR, 'templates', 'account')
+            BASE_DIR / 'templates', 
+            BASE_DIR / 'allauth',
+            BASE_DIR / 'templates' / 'account'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -100,21 +91,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'HellowLab.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database configuration
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
-
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv('POSTGRES_DB', 'postgres'),
+            "USER": os.getenv('POSTGRES_USER', 'postgres'),
+            "PASSWORD": os.getenv('POSTGRES_PASSWORD', 'postgres'),
+            "HOST": os.getenv('POSTGRES_HOST', 'db'),
+            "PORT": os.getenv('POSTGRES_PORT', '5432'),
+        }
+    }
 
 # Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -130,96 +127,65 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
 STATIC_URL = 'static/'
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Everything below was added #
+# REST Framework settings
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ]
 }
 
+# JWT Configuration
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=2),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=365),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
-    "SIGNING_KEY": "1cba1825df19885dfd126688f56e254a0b4717f5a57c99d554df93b7cbfbebf3c35ad6444b52452bac25d04221fd2207e405ad7e13d852c02b59d0b6468d9fdd",  # generated via openssl rand -hex 64
+    "SIGNING_KEY": os.getenv('JWT_SIGNING_KEY', 'your-default-jwt-signing-key'),
     "ALGORITHM": "HS512",
 }
 
-SITE_ID = 1  # make sure SITE_ID is set
+SITE_ID = 1  # Ensure SITE_ID is set
 
-ACCOUNT_EMAIL_REQUIRED = True # old value false
-ACCOUNT_EMAIL_VERIFICATION = "optional" #old value none
+# Django AllAuth settings
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "optional"
 
-if DEBUG: # for testing, don't send an email, print to console.
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-else: # use real smtp server
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587  # Gmail SMTP port
-EMAIL_USE_TLS = True  # Transport Layer Security
-EMAIL_HOST_USER = 'mango23322@gmail.com'  # Your Gmail address
-EMAIL_HOST_PASSWORD = 'plstetjhsbjanhbq'  # Your Gmail password or app password
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'mango23322@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'plstetjhsbjanhbq')
 
-# <EMAIL_CONFIRM_REDIRECT_BASE_URL>/<key>
-EMAIL_CONFIRM_REDIRECT_BASE_URL = \
-    "http://localhost:3000/login/email/confirm/"
-
-# <PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL>/<uidb64>/<token>/
-PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = \
-    "http://localhost:3000/login/password-reset/confirm/"
+EMAIL_CONFIRM_REDIRECT_BASE_URL = "http://localhost:3000/login/email/confirm/"
+PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = "http://localhost:3000/login/password-reset/confirm/"
 
 REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_HTTPONLY": False,
     "PASSWORD_RESET_SERIALIZER": "dj_rest_auth.serializers.PasswordResetSerializer",
-
 }
 
-# CSRF_TRUSTED_ORIGINS=['http://127.0.0.1:8000', 'http://localhost:8000', 'http://tags.mangoon.duckdns.org', 'http://tags-backend.mangoon.duckdns.org', 'http://nextjs_tags:3000', 'http://localhost:3000', 'http://*']
-CSRF_TRUSTED_ORIGINS=['http://127.0.0.1:8000', 'http://localhost:8000', 'http://tags.mgbcengineering.com', 'http://tagsdnekcab.mgbcengineering.com', 'http://mgbcengineering.com', 'https://tags.mgbcengineering.com', 'https://tagsdnekcab.mgbcengineering.com', 'https://mgbcengineering.com', 'http://nextjs_tags:3000', 'http://localhost:3000', 'http://*']
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:8000,http://localhost:8000').split(',')
 
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    CORS_ALLOW_CREDENTIALS = True
-    CORS_ALLOW_ALL_ORIGINS=True
-    # CSRF_TRUSTED_ORIGINS = ['tags-backend.mangoon.duckdns.org', 'tags.mangoon.duckdns.org', '127.0.0.1', 'localhost'] // use vesion in line 167
-    # CORS_ALLOWED_ORIGINS = [
-    #     "http://localhost:3000/",
-    #     "http://127.0.0.1:3000/",
-    #     "http://nextjs_tags:3000/"
-    # ]
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOW_CREDENTIALS = not DEBUG
 
 ACCOUNT_ADAPTER = 'authentication.adapter.DefaultAccountAdapterCustom'
 SITE_NAME = 'HellowLab'
 
-if DEBUG:
-    URL_FRONT = 'http://localhost:3000/'
-else:
-    URL_FRONT = 'https://tags.mgbcengineering.com/'
+# URL_FRONT = 'http://localhost:3000/' if DEBUG else 'https://tags.mgbcengineering.com/'
