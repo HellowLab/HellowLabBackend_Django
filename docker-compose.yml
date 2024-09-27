@@ -1,5 +1,4 @@
 
-version: '3'
 services:
   django:
     container_name: django_hellowlab
@@ -15,7 +14,7 @@ services:
       - DEBUG=False
       - DJANGO_DB_HOST=db
       - DJANGO_DB_PORT=5432
-      - DJANGO_DB_NAME=django_db_hellowlab
+      - DJANGO_DB_NAME=hellowlab_db
       - DJANGO_DB_USER=admin
       - DJANGO_DB_PASSWORD=password
     restart: unless-stopped
