@@ -1,11 +1,10 @@
-
+version: '3'
 services:
+  # Django Service
   django:
     container_name: django_hellowlab
     build: .
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
-    # volumes: # Uncomment this if you want to overwrite the existing app folder with your local app folder
-    #   - .:/app
     ports:
       - "8001:8000"
     depends_on:
@@ -17,7 +16,11 @@ services:
       - DJANGO_DB_NAME=hellowlab_db
       - DJANGO_DB_USER=admin
       - DJANGO_DB_PASSWORD=password
+    networks:
+      - backend
     restart: unless-stopped
+
+  # PostgreSQL Service
   db:
     container_name: hellowlab_db
     image: postgres:latest
@@ -27,12 +30,75 @@ services:
       - POSTGRES_DB=hellowlab_db
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=password
+    networks:
+      - backend
     restart: unless-stopped
+
+  # NGINX Proxy Manager Service
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx_proxy_manager
+    ports:
+      - "80:80"    # HTTP
+      - "443:443"  # HTTPS
+      - "81:81"    # NGINX Proxy Manager UI
+    environment:
+      - DB_SQLITE_FILE=/data/database.sqlite
+    volumes:
+      - ./nginx_proxy_data:/data
+      - ./nginx_proxy_letsencrypt:/etc/letsencrypt
+      - ./nginx_ssl:/etc/ssl/certs  # Mount your SSL cert directory
+
+    networks:
+      - backend
+      - frontend
+    restart: unless-stopped
+
+  # # Portainer Service
+  # portainer:
+  #   image: portainer/portainer-ce
+  #   container_name: portainer
+  #   command: -H unix:///var/run/docker.sock
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - portainer_data:/data
+  #   ports:
+  #     - "9000:9000" # Portainer UI
+  #   networks:
+  #     - frontend
+  #   restart: unless-stopped
+
+  # # Prometheus Service
+  # prometheus:
+  #   image: prom/prometheus
+  #   container_name: prometheus
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     - backend
+  #   restart: unless-stopped
+
+  # # Grafana Service
+  # grafana:
+  #   image: grafana/grafana
+  #   container_name: grafana
+  #   ports:
+  #     - "3000:3000" # Grafana UI
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin # Set Grafana admin password
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  #   networks:
+  #     - backend
+  #   restart: unless-stopped
 
 volumes:
   postgres_data:
+  portainer_data:
+  grafana_data:
 
 networks:
-  default:
-    name: my_network
-    external: true
+  backend:
+  frontend:
