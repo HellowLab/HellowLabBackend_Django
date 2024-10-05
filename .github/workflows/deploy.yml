@@ -20,7 +20,7 @@ jobs:
 
       - name: Deploy to VPS
         run: |
-          ssh -o StrictHostKeyChecking=no root@159.89.227.220 << 'EOF'
+          ssh -o StrictHostKeyChecking=no root@146.190.185.97 << 'EOF'
             cd HellowLabBackend_Django
             git pull origin main
             sudo docker compose up -d --build --remove-orphans
