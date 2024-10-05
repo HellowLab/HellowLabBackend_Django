@@ -12,18 +12,23 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware import csrf
 from django.contrib.auth.models import User
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
+from django.core.signing import Signer, BadSignature
+
 
 import json
 from .models import *
 from .serializers import *
 import csv
 
+User = get_user_model()
+signer = Signer()
 
 def email_confirm_redirect(request, key):
     return HttpResponseRedirect(
@@ -109,6 +114,28 @@ class MyUserDetailsView(APIView):
         user = self.request.user
         serializer = CustomUserSerializer(user)
         return Response(serializer.data)
+
+def delete_account(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        email = request.POST['email']
+
+        try:
+            # find the user based on the username
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            # if the user is not found, return an error
+            return HttpResponse("User not found.", status=400)
+
+        # Validate that the provided username and email match the user
+        if user.username == username and user.email == email:
+            user.delete()
+            return HttpResponse("Your account has been successfully deleted.", status=200)
+        else:
+            return HttpResponse("Username and email do not match.", status=400)
+
+    return render(request, 'HellowLab/delete_account.html')
+
 
 ##### END USER ACCOUNT VIEWS #####
 
