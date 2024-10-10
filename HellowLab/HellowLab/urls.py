@@ -16,11 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views import privacy_policy
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
     path('auth/', include('allauth.urls')), # new
     path('dblfeature/', include('dblfeature.urls')),
+    path('privacy-policy/', privacy_policy, name='privacy_policy'),
+
 
 ]
