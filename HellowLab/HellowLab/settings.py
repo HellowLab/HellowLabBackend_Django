@@ -168,8 +168,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' if DEBUG else '
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'mango23322@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'plstetjhsbjanhbq')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'hellowlabs@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'dgynhxxeuvwbsopk')
 
 EMAIL_CONFIRM_REDIRECT_BASE_URL = "http://localhost:3000/login/email/confirm/"
 PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = "http://localhost:3000/login/password-reset/confirm/"
@@ -188,4 +188,4 @@ CORS_ALLOW_CREDENTIALS = not DEBUG
 ACCOUNT_ADAPTER = 'authentication.adapter.DefaultAccountAdapterCustom'
 SITE_NAME = 'HellowLab'
 
-# URL_FRONT = 'http://localhost:3000/' if DEBUG else 'https://tags.mgbcengineering.com/'
+URL_FRONT = 'http://localhost:3000/' if DEBUG else 'https://hellowlab.com/'
