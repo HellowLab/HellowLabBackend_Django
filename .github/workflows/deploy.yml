@@ -22,6 +22,17 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@146.190.185.97 << 'EOF'
             cd HellowLabBackend_Django
+
+            echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" > HellowLab/HellowLab/.env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> HellowLab/HellowLab/.env
+            echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> HellowLab/HellowLab/.env
+            echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> HellowLab/HellowLab/.env
+            echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> HellowLab/HellowLab/.env
+            echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> HellowLab/HellowLab/.env
+            echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> hellowlab/hellowlab/.env
+            echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> HellowLab/HellowLab/.env
+            echo "JWT_SIGNING_KEY=${{ secrets.JWT_SIGNING_KEY }}" >> HellowLab/HellowLab/.env
+
             git pull origin main
             sudo docker compose up -d --build --remove-orphans
           EOF
