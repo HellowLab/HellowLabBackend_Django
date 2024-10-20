@@ -22,13 +22,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+# default value for production is set to False
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-lyx6a7p7p59(g6j)uia#-i8f26708^q8%_lz*sb7kn)@k(^di!')
 
-ALLOWED_HOSTS = ['*']
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'hellowlab.com,www.hellowlab.com,dnekcab.hellowlab.com,146.190.185.97').split(',')
 
 # Application definition
 
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     
     # Third-party apps
     "corsheaders",
@@ -103,11 +104,11 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv('DJANGO_DB_NAME', 'hellowlab_db'),
+            "NAME": 'hellowlab_db',
             "USER": os.getenv('DJANGO_DB_USER', 'admin'),
             "PASSWORD": os.getenv('DJANGO_DB_PASSWORD', 'password'),
-            "HOST": os.getenv('DJANGO_DB_HOST', 'db'),
-            "PORT": os.getenv('DJANGO_DB_PORT', '5432'),
+            "HOST": 'db',
+            "PORT": '5432',
         }
     }
 
@@ -153,7 +154,7 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
-    "SIGNING_KEY": os.getenv('JWT_SIGNING_KEY', 'your-default-jwt-signing-key'),
+    "JWT_SIGNING_KEY": os.getenv('JWT_SIGNING_KEY', 'c2b1091813186725bb6d86f6a3517126e0f1f3010033c8c581f5d9adfaa6c867bc784ec3a69e6d28f92b0ea6f17b980d3017a9af27176d89ade6c25896f7835c'),
     "ALGORITHM": "HS512",
 }
 
@@ -164,12 +165,13 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 
 # Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND_DEFAULT = 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', EMAIL_BACKEND_DEFAULT) # if var is not in .env, use default value based on debug mode
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'hellowlabs@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'dgynhxxeuvwbsopk')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'UsEaNeNvIrOnMeNtVaRiAbLe')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'UsEaNeNvIrOnMeNtVaRiAbLe')
 
 EMAIL_CONFIRM_REDIRECT_BASE_URL = "http://localhost:3000/login/email/confirm/"
 PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = "http://localhost:3000/login/password-reset/confirm/"
@@ -180,7 +182,7 @@ REST_AUTH = {
     "PASSWORD_RESET_SERIALIZER": "dj_rest_auth.serializers.PasswordResetSerializer",
 }
 
-CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:8000,http://localhost:8000').split(',')
+CSRF_TRUSTED_ORIGINS = ['https://hellowlab.com', 'https://www.hellowlab.com', 'https://dnekcab.hellowlab.com', 'http://localhost:8000']
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOW_CREDENTIALS = not DEBUG
@@ -188,4 +190,4 @@ CORS_ALLOW_CREDENTIALS = not DEBUG
 ACCOUNT_ADAPTER = 'authentication.adapter.DefaultAccountAdapterCustom'
 SITE_NAME = 'HellowLab'
 
-URL_FRONT = 'http://localhost:3000/' if DEBUG else 'https://hellowlab.com/'
+URL_FRONT = os.getenv('URL_FRONT', 'https://HellowLab.com/')
