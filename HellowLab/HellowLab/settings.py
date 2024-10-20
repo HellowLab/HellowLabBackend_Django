@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
     
     # Third-party apps
     "corsheaders",
@@ -51,6 +50,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount",  # add if you want social authentication
     "dj_rest_auth",
     "dj_rest_auth.registration",
+    # 'django.contrib.sites',
+
 
     # Local apps
     'dblfeature',
