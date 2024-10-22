@@ -8,13 +8,20 @@ services:
       - "8001:8000"
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
-      - DEBUG=False
-      - DJANGO_DB_HOST=db
-      - DJANGO_DB_PORT=5432
+      - DEBUG=false
       - DJANGO_DB_NAME=hellowlab_db
-      - DJANGO_DB_USER=admin
-      - DJANGO_DB_PASSWORD=password
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
+      - DJANGO_DB_USER=${DJANGO_DB_USER}
+      - DJANGO_DB_PASSWORD=${DJANGO_DB_PASSWORD}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - JWT_SIGNING_KEY=${JWT_SIGNING_KEY}
+      - SSH_PRIVATE_KEY=${SSH_PRIVATE_KEY}
     networks:
       - backend
     restart: unless-stopped
@@ -27,8 +34,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=hellowlab_db
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=${DJANGO_DB_USER}
+      - POSTGRES_PASSWORD=${DJANGO_DB_PASSWORD}
     networks:
       - backend
     restart: unless-stopped
