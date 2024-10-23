@@ -31,7 +31,7 @@ services:
     container_name: hellowlab_db
     image: postgres:latest
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres_data/:/var/lib/postgresql/data
     ports:
       - 5432:5432
     environment:
@@ -102,8 +102,8 @@ services:
 
 volumes:
   postgres_data:
-  portainer_data:
-  grafana_data:
+  # portainer_data:
+  # grafana_data:
 
 networks:
   backend:

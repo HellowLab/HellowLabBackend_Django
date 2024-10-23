@@ -164,3 +164,4 @@ cython_debug/
 # Database Files
 nginx_ssl/
 nginx_proxy_data/
+postgres_data/
