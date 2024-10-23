@@ -33,6 +33,7 @@ jobs:
             echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> HellowLab/HellowLab/.env
             echo "JWT_SIGNING_KEY=${{ secrets.JWT_SIGNING_KEY }}" >> HellowLab/HellowLab/.env
 
+            git checkout main
             git pull origin main
             sudo docker compose up -d --build --remove-orphans
           EOF

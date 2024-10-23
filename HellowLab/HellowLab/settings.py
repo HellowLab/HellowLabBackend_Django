@@ -108,7 +108,7 @@ else:
             "NAME": 'hellowlab_db',
             "USER": os.getenv('DJANGO_DB_USER', 'admin'),
             "PASSWORD": os.getenv('DJANGO_DB_PASSWORD', 'password'),
-            "HOST": 'db',
+            "HOST": 'hellowlab_db',
             "PORT": '5432',
         }
     }
