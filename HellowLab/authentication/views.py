@@ -117,22 +117,28 @@ class MyUserDetailsView(APIView):
 
 def delete_account(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        email = request.POST['email']
-
-        try:
-            # find the user based on the username
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            # if the user is not found, return an error
-            return HttpResponse("User not found.", status=400)
-
-        # Validate that the provided username and email match the user
-        if user.username == username and user.email == email:
+        # if token exists, process based on user's token
+        if request.user.is_authenticated:
+            user = request.user
             user.delete()
             return HttpResponse("Your account has been successfully deleted.", status=200)
         else:
-            return HttpResponse("Username and email do not match.", status=400)
+            username = request.POST['username']
+            email = request.POST['email']
+
+            try:
+                # find the user based on the username
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                # if the user is not found, return an error
+                return HttpResponse("User not found.", status=400)
+
+            # Validate that the provided username and email match the user
+            if user.username == username and user.email == email:
+                user.delete()
+                return HttpResponse("Your account has been successfully deleted.", status=200)
+            else:
+                return HttpResponse("Username and email do not match.", status=400)
 
     return render(request, 'HellowLab/delete_account.html')
 
