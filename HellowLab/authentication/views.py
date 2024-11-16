@@ -115,6 +115,7 @@ class MyUserDetailsView(APIView):
         serializer = CustomUserSerializer(user)
         return Response(serializer.data)
 
+@api_view(['POST', 'GET'])
 def delete_account(request):
     if request.method == 'POST':
         # if token exists, process based on user's token
