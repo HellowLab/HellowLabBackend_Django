@@ -174,4 +174,59 @@ class TmdbIndexView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class MovieListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        lists = MovieList.objects.filter(user=user)
+        serializer = MovieListSerializer(lists, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        user = request.user
+        serializer = MovieListSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, list_id):
+        user = request.user
+        movie_list = get_object_or_404(MovieList, id=list_id, user=user)
+        serializer = MovieListSerializer(movie_list, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, list_id, format=None):  # Make sure the argument name is 'list_id'
+        try:
+            movie_list = MovieList.objects.get(pk=list_id, user=request.user)
+            movie_list.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)  # No body included
+        except MovieList.DoesNotExist:
+            return Response({"error": "Movie list not found."}, status=status.HTTP_404_NOT_FOUND)
+
+class MovieListItemView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, list_id):
+        user = request.user
+        movie_list = get_object_or_404(MovieList, id=list_id, user=user)
+        data = request.data.copy()
+        data['movie_list'] = movie_list.id
+        serializer = MovieListItemSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, list_id, item_id):
+        user = request.user
+        movie_list = get_object_or_404(MovieList, id=list_id, user=user)
+        item = get_object_or_404(MovieListItem, id=item_id, movie_list=movie_list)
+        item.delete()
+        return Response({"detail": "Item removed from list."}, status=status.HTTP_204_NO_CONTENT)
+
 ### END FILE ###
