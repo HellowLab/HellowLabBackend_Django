@@ -224,9 +224,18 @@ class MovieListItemView(APIView):
 
     def delete(self, request, list_id, item_id):
         user = request.user
+    
+        # Check if the movie list exists
         movie_list = get_object_or_404(MovieList, id=list_id, user=user)
-        item = get_object_or_404(MovieListItem, id=item_id, movie_list=movie_list)
+
+        # Check if the movie list item exists using tmdb_id
+        item = get_object_or_404(MovieListItem, tmdb_id=item_id, movie_list=movie_list)
+
+        # If everything is found, delete the item
         item.delete()
-        return Response({"detail": "Item removed from list."}, status=status.HTTP_204_NO_CONTENT)
+        print("Item deleted successfully")
+
+        # Return the success response
+        return Response(status=status.HTTP_204_NO_CONTENT) 
 
 ### END FILE ###
