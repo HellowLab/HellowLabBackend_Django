@@ -1,12 +1,23 @@
 # api/serializers.py
 
 from rest_framework import serializers
+from dj_rest_auth.registration.serializers import RegisterSerializer
 from django.contrib.auth import get_user_model
 
 from .models import *
 
 User = get_user_model()
 
+class CustomRegisterSerializer(RegisterSerializer):
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+
+    def save(self, request):
+        user = super().save(request)
+        user.first_name = self.data.get('first_name')
+        user.last_name = self.data.get('last_name')
+        user.save()
+        return user
 class CreateUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
@@ -27,6 +38,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'username', 'pk']
+        read_only_fields = ['pk', 'username']  # Prevent these from being updated
 
 
 class FriendRequestSerializer(serializers.ModelSerializer):

@@ -20,7 +20,8 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
-
+from dj_rest_auth.registration.views import RegisterView
+from dj_rest_auth.views import LogoutView
 
 import json
 from .models import *
@@ -42,25 +43,11 @@ def password_reset_confirm_redirect(request, uidb64, token):
     )
 
 #### USER ACCOUNT VIEWS #####
-class CreateUserAPIView(CreateAPIView):
-    serializer_class = CreateUserSerializer
-    permission_classes = [AllowAny]
 
-    def create(self, request, *args, **kwargs):
-        print("recieved register user POST")
-        if request.method == "POST":
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            # We create a token than will be used for future auth
-            token = Token.objects.create(user=serializer.instance)
-            token_data = {"token": token.key}
-        return Response(
-                {**serializer.data, **token_data},
-                status=status.HTTP_201_CREATED,
-                headers=headers
-            )
+# Custom User Registration View
+class CustomRegisterView(RegisterView):
+    serializer_class = CustomRegisterSerializer
+
 class LogoutUserAPIView(APIView):
     queryset = get_user_model().objects.all()
 
@@ -72,6 +59,7 @@ class LogoutUserAPIView(APIView):
 def csrf_token_view(request):
     csrf_token = csrf.get_token(request)
     return JsonResponse({'csrfToken': csrf_token})
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -114,6 +102,33 @@ class MyUserDetailsView(APIView):
         user = self.request.user
         serializer = CustomUserSerializer(user)
         return Response(serializer.data)
+
+class UserDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Get the currently authenticated user's data
+        user = request.user
+        serializer = CustomUserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        # Update all user data (full update)
+        user = request.user
+        serializer = CustomUserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request):
+        # Update partial user data
+        user = request.user
+        serializer = CustomUserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST', 'GET'])
 def delete_account(request):
