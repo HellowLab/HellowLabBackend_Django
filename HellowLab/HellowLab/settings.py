@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     # 'django.contrib.sites',
 
-
     # Local apps
     'dblfeature',
     "authentication.apps.AuthenticationConfig", 
@@ -92,6 +91,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'HellowLab.wsgi.application'
+
+AUTH_USER_MODEL = 'authentication.CustomUser'
 
 # Database configuration
 if DEBUG:

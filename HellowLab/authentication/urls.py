@@ -12,7 +12,7 @@ from .views import *
 
 urlpatterns = [
     path("register/", CustomRegisterView.as_view(), name="rest_register"),
-    path("login/", LoginView.as_view(), name="rest_login"),
+    path("login/", CustomLoginView.as_view(), name="custom-login"),
     path("logout/", LogoutView.as_view(), name="rest_logout"),
     path("user/", UserDetailsView.as_view(), name="rest_user_details"), # this is the default provided by dj-rest-auth
     path("myuser/", MyUserDetailsView.as_view(), name="my_user_details"), # this is the old/obsolete custom view

@@ -21,7 +21,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from dj_rest_auth.registration.views import RegisterView
-from dj_rest_auth.views import LogoutView
+from dj_rest_auth.views import LogoutView, LoginView
+
 
 import json
 from .models import *
@@ -47,6 +48,32 @@ def password_reset_confirm_redirect(request, uidb64, token):
 # Custom User Registration View
 class CustomRegisterView(RegisterView):
     serializer_class = CustomRegisterSerializer
+
+    def create(self, request, *args, **kwargs):
+        """
+        Override the create method to include full user details in the response.
+        """
+        # Call the default create method
+        response = super().create(request, *args, **kwargs)
+
+        return response
+
+# Custom User Login View
+class CustomLoginView(LoginView):
+    serializer_class = CustomLoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        # Call the default login behavior (authentication and token generation)
+        response = super().post(request, *args, **kwargs)
+        # Once the user is authenticated and the token is created, include custom fields
+        user = request.user
+        user_data = CustomRegisterSerializer(user).data  # Serialize the user object
+
+        # Add the serialized user data to the response
+        response_data = response.data
+        response_data['user'] = user_data  # Include the full user data in the response
+
+        return Response(response_data)
 
 class LogoutUserAPIView(APIView):
     queryset = get_user_model().objects.all()
@@ -110,6 +137,7 @@ class UserDetailView(APIView):
         # Get the currently authenticated user's data
         user = request.user
         serializer = CustomUserSerializer(user)
+        print("UserDetailView serializer.data: ", serializer.data)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request):
@@ -158,8 +186,8 @@ def delete_account(request):
 
     return render(request, 'HellowLab/delete_account.html')
 
-
 ##### END USER ACCOUNT VIEWS #####
+
 
 ##### FREINDSHIP VIEWS #####
 
@@ -182,7 +210,6 @@ class FriendshipView(APIView):
             serializer.save(user1=self.request.user, user2=user2)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class FriendRequestViewSet(viewsets.ModelViewSet):
     serializer_class = FriendRequestSerializer

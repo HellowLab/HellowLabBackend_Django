@@ -2,15 +2,19 @@
 
 from rest_framework import serializers
 from dj_rest_auth.registration.serializers import RegisterSerializer
+from dj_rest_auth.serializers import LoginSerializer
 from django.contrib.auth import get_user_model
 
 from .models import *
 
 User = get_user_model()
 
+# Custom Register Serializer
 class CustomRegisterSerializer(RegisterSerializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
+    bio = serializers.CharField(required=False)
+    profile_image = serializers.ImageField(required=False)
 
     def save(self, request):
         user = super().save(request)
@@ -18,26 +22,40 @@ class CustomRegisterSerializer(RegisterSerializer):
         user.last_name = self.data.get('last_name')
         user.save()
         return user
-class CreateUserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
-    class Meta:
-        model = get_user_model()
-        fields = ('username', 'password', 'first_name', 'last_name', 'email')
-        write_only_fields = ('password')
-        read_only_fields = ('is_staff', 'is_superuser', 'is_active',)
+    def to_representation(self, instance):
+        """Customize the representation of the newly created user"""
+        representation = super().to_representation(instance)
+        # representation['profile_image'] = instance.profile_image.url if instance.profile_image else None
+        # representation['bio'] = instance.bio
+        return representation
 
-    def create(self, validated_data):
-        user = super(CreateUserSerializer, self).create(validated_data)
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
+# Custom Login Serializer
+class CustomLoginSerializer(LoginSerializer):
+    profile_image = serializers.ImageField( required=False)
+    bio = serializers.CharField(required=False)
+
+    def validate(self, attrs):
+        data = super().validate(attrs)  # Perform the default validation
+
+        user = self.context['request'].user  # Access the user after login
+
+        # Check if the user is authenticated
+        if user.is_authenticated:
+            data['profile_image'] = user.profile_image.url if user.profile_image else None
+            data['bio'] = user.bio
+        else:
+            # You can choose to exclude custom fields or return default values if user is not authenticated
+            data['profile_image'] = None
+            data['bio'] = None
+
+        return data
     
+# Custom User Serializer
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'username', 'pk']
+        fields = ['first_name', 'last_name', 'email', 'username', 'pk', 'bio', 'profile_image']
         read_only_fields = ['pk', 'username']  # Prevent these from being updated
 
 
