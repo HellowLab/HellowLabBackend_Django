@@ -97,10 +97,10 @@ def update_user_data(request):
     print("update_user_data data: ", data)
 
     if data:
-        if 'profile_image' in request.FILES:
-            print("profile_image in request.FILES")
+        if 'profile_picture' in request.FILES:
+            print("profile_picture in request.FILES")
             # Update user's profile image
-            user.profile_image = request.FILES['profile_image']
+            user.profile_picture = request.FILES['profile_picture']
             user.save()
         
         serializer = CustomUserSerializer(user, data=request.data, partial=True)

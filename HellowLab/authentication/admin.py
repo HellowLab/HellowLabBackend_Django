@@ -8,8 +8,8 @@ class CustomUserAdmin(UserAdmin):
 
     # Add custom fields to the admin form
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('profile_image', 'bio')}),
+        (None, {'fields': ('profile_picture', 'bio')}),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
-        (None, {'fields': ('profile_image', 'bio')}),
+        (None, {'fields': ('profile_picture', 'bio')}),
     )

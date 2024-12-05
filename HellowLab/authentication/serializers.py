@@ -14,7 +14,7 @@ class CustomRegisterSerializer(RegisterSerializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     bio = serializers.CharField(required=False)
-    profile_image = serializers.ImageField(required=False)
+    profile_picture = serializers.ImageField(required=False)
 
     def save(self, request):
         user = super().save(request)
@@ -26,13 +26,13 @@ class CustomRegisterSerializer(RegisterSerializer):
     def to_representation(self, instance):
         """Customize the representation of the newly created user"""
         representation = super().to_representation(instance)
-        # representation['profile_image'] = instance.profile_image.url if instance.profile_image else None
+        # representation['profile_picture'] = instance.profile_picture.url if instance.profile_picture else None
         # representation['bio'] = instance.bio
         return representation
 
 # Custom Login Serializer
 class CustomLoginSerializer(LoginSerializer):
-    profile_image = serializers.ImageField( required=False)
+    profile_picture = serializers.ImageField( required=False)
     bio = serializers.CharField(required=False)
 
     def validate(self, attrs):
@@ -42,11 +42,11 @@ class CustomLoginSerializer(LoginSerializer):
 
         # Check if the user is authenticated
         if user.is_authenticated:
-            data['profile_image'] = user.profile_image.url if user.profile_image else None
+            data['profile_picture'] = user.profile_picture.url if user.profile_picture else None
             data['bio'] = user.bio
         else:
             # You can choose to exclude custom fields or return default values if user is not authenticated
-            data['profile_image'] = None
+            data['profile_picture'] = None
             data['bio'] = None
 
         return data
@@ -55,7 +55,7 @@ class CustomLoginSerializer(LoginSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'username', 'pk', 'bio', 'profile_image']
+        fields = ['first_name', 'last_name', 'email', 'username', 'pk', 'bio', 'profile_picture']
         read_only_fields = ['pk', 'username']  # Prevent these from being updated
 
 

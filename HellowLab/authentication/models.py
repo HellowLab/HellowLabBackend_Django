@@ -8,7 +8,7 @@ from datetime import datetime
 
 ### User Models ###
 class CustomUser(AbstractUser):
-    profile_image = models.ImageField(blank=True, null=True, upload_to="profile_images/")
+    profile_picture = models.ImageField(blank=True, null=True, upload_to="profile_pictures/")
     bio = models.TextField(blank=True, null=True, max_length=500)
 
     def __str__(self):

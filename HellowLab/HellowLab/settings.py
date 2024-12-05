@@ -193,3 +193,6 @@ ACCOUNT_ADAPTER = 'authentication.adapter.DefaultAccountAdapterCustom'
 SITE_NAME = 'HellowLab'
 
 URL_FRONT = os.getenv('URL_FRONT', 'https://HellowLab.com/')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
