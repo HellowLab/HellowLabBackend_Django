@@ -87,49 +87,6 @@ def csrf_token_view(request):
     csrf_token = csrf.get_token(request)
     return JsonResponse({'csrfToken': csrf_token})
 
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def update_user_data(request):
-    user = request.user
-    data = request.data
-
-    print("update_user_data data: ", data)
-
-    if data:
-        if 'profile_picture' in request.FILES:
-            print("profile_picture in request.FILES")
-            # Update user's profile image
-            user.profile_picture = request.FILES['profile_picture']
-            user.save()
-        
-        serializer = CustomUserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        # try:
-        #     for field, value in data.items():
-        #         if hasattr(user, field):
-        #             setattr(user, field, value)
-        #         else:
-        #             return Response({'error': f'Field {field} does not exist'}, status=400)
-        #     user.save()
-        #     myuser = CustomUserSerializer(user).data            
-        #     return Response(myuser)
-
-        # except Exception as e:
-        #     return Response({'error': str(e)}, status=500)
-    else:
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': 'No data provided'}, status=400)
-
-@permission_classes([IsAuthenticated])
-class MyUserDetailsView(APIView):
-    def get(self, request):
-        user = self.request.user
-        serializer = CustomUserSerializer(user)
-        return Response(serializer.data)
-
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
