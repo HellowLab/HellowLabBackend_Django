@@ -40,12 +40,18 @@ jobs:
               echo "JWT_SIGNING_KEY=${{ secrets.JWT_SIGNING_KEY }}" >> .env
               
               git checkout main
-              ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=7 admin@UPDATEIPADDRESS << 'EOF'
-
               git pull origin main
               echo "Deploying to production environment"
               sudo docker compose up -d --build --remove-orphans
             elif [ "$BRANCH" == "integration" ]; then
+              ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=7 admin@136.49.185.195 << 'EOF'
+              cd HellowLabBackend_Django
+              echo "Using existing .env file (this does not check that the file exists, please ensure it does before running this script)"
               
+              git checkout integration
+
+              git pull origin integration
+              echo "Deploying to integration/test environment using .dev.yml file"
+              sudo docker compose -f docker-compose.dev.yml up -d --build --remove-orphans
             fi
           EOF
