@@ -52,7 +52,6 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     # 'django.contrib.sites',
 
-
     # Local apps
     'dblfeature',
     "authentication.apps.AuthenticationConfig", 
@@ -92,6 +91,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'HellowLab.wsgi.application'
+
+AUTH_USER_MODEL = 'authentication.CustomUser'
 
 # Database configuration
 if DEBUG:
@@ -183,7 +184,7 @@ REST_AUTH = {
     "PASSWORD_RESET_SERIALIZER": "dj_rest_auth.serializers.PasswordResetSerializer",
 }
 
-CSRF_TRUSTED_ORIGINS = ['https://hellowlab.com', 'https://www.hellowlab.com', 'https://dnekcab.hellowlab.com', 'http://localhost:8000']
+CSRF_TRUSTED_ORIGINS = ['https://hellowlab.com', 'https://www.hellowlab.com', 'https://dnekcab.hellowlab.com', 'https://integration.hellowlab.com', 'http://localhost:8000']
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOW_CREDENTIALS = not DEBUG
@@ -192,3 +193,6 @@ ACCOUNT_ADAPTER = 'authentication.adapter.DefaultAccountAdapterCustom'
 SITE_NAME = 'HellowLab'
 
 URL_FRONT = os.getenv('URL_FRONT', 'https://HellowLab.com/')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

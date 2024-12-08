@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y netcat-openbsd && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY /HellowLab/ /app/
+COPY entrypoint.sh /app/
 
 # Make the entrypoint script executable
 RUN chmod +x /app/entrypoint.sh

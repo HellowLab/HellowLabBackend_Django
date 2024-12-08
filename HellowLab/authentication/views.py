@@ -20,6 +20,8 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
+from dj_rest_auth.registration.views import RegisterView
+from dj_rest_auth.views import LogoutView, LoginView
 
 
 import json
@@ -42,25 +44,37 @@ def password_reset_confirm_redirect(request, uidb64, token):
     )
 
 #### USER ACCOUNT VIEWS #####
-class CreateUserAPIView(CreateAPIView):
-    serializer_class = CreateUserSerializer
-    permission_classes = [AllowAny]
+
+# Custom User Registration View
+class CustomRegisterView(RegisterView):
+    serializer_class = CustomRegisterSerializer
 
     def create(self, request, *args, **kwargs):
-        print("recieved register user POST")
-        if request.method == "POST":
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            # We create a token than will be used for future auth
-            token = Token.objects.create(user=serializer.instance)
-            token_data = {"token": token.key}
-        return Response(
-                {**serializer.data, **token_data},
-                status=status.HTTP_201_CREATED,
-                headers=headers
-            )
+        """
+        Override the create method to include full user details in the response.
+        """
+        # Call the default create method
+        response = super().create(request, *args, **kwargs)
+
+        return response
+
+# Custom User Login View
+class CustomLoginView(LoginView):
+    serializer_class = CustomLoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        # Call the default login behavior (authentication and token generation)
+        response = super().post(request, *args, **kwargs)
+        # Once the user is authenticated and the token is created, include custom fields
+        user = request.user
+        user_data = CustomRegisterSerializer(user).data  # Serialize the user object
+
+        # Add the serialized user data to the response
+        response_data = response.data
+        response_data['user'] = user_data  # Include the full user data in the response
+
+        return Response(response_data)
+
 class LogoutUserAPIView(APIView):
     queryset = get_user_model().objects.all()
 
@@ -73,47 +87,33 @@ def csrf_token_view(request):
     csrf_token = csrf.get_token(request)
     return JsonResponse({'csrfToken': csrf_token})
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def update_user_data(request):
-    user = request.user
-    data = request.data
+class UserDetailView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    print("update_user_data data: ", data)
+    def get(self, request):
+        # Get the currently authenticated user's data
+        user = request.user
+        serializer = CustomUserSerializer(user)
+        print("UserDetailView serializer.data: ", serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    if data:
-        if 'profile_image' in request.FILES:
-            print("profile_image in request.FILES")
-            # Update user's profile image
-            user.profile_image = request.FILES['profile_image']
-            user.save()
-        
+    def put(self, request):
+        # Update all user data (full update)
+        user = request.user
+        serializer = CustomUserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request):
+        # Update partial user data
+        user = request.user
         serializer = CustomUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        # try:
-        #     for field, value in data.items():
-        #         if hasattr(user, field):
-        #             setattr(user, field, value)
-        #         else:
-        #             return Response({'error': f'Field {field} does not exist'}, status=400)
-        #     user.save()
-        #     myuser = CustomUserSerializer(user).data            
-        #     return Response(myuser)
-
-        # except Exception as e:
-        #     return Response({'error': str(e)}, status=500)
-    else:
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': 'No data provided'}, status=400)
-
-@permission_classes([IsAuthenticated])
-class MyUserDetailsView(APIView):
-    def get(self, request):
-        user = self.request.user
-        serializer = CustomUserSerializer(user)
-        return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST', 'GET'])
 def delete_account(request):
@@ -143,8 +143,8 @@ def delete_account(request):
 
     return render(request, 'HellowLab/delete_account.html')
 
-
 ##### END USER ACCOUNT VIEWS #####
+
 
 ##### FREINDSHIP VIEWS #####
 
@@ -167,7 +167,6 @@ class FriendshipView(APIView):
             serializer.save(user1=self.request.user, user2=user2)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class FriendRequestViewSet(viewsets.ModelViewSet):
     serializer_class = FriendRequestSerializer
