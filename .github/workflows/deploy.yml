@@ -27,34 +27,34 @@ jobs:
           
           if [ "$BRANCH" == "main" ]; then
             ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=7 root@146.190.185.97 << 'EOF'
-cd HellowLabBackend_Django
-echo "Creating .env file at HellowLabBackend_Django/.env"
+          cd HellowLabBackend_Django
+          echo "Creating .env file at HellowLabBackend_Django/.env"
 
-echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" > .env
-echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> .env
-echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> .env
-echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env
-echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env
-echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
-echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
-echo "JWT_SIGNING_KEY=${{ secrets.JWT_SIGNING_KEY }}" >> .env
+          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" > .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}" >> .env
+          echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> .env
+          echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env
+          echo "DJANGO_DB_PASSWORD=${{ secrets.DJANGO_DB_PASSWORD }}" >> .env
+          echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
+          echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
+          echo "JWT_SIGNING_KEY=${{ secrets.JWT_SIGNING_KEY }}" >> .env
 
-git checkout main
-git pull origin main
-echo "Deploying to production environment"
-sudo docker compose up -d --build --remove-orphans
-EOF
+          git checkout main
+          git pull origin main
+          echo "Deploying to production environment"
+          sudo docker compose up -d --build --remove-orphans
+          EOF
           elif [ "$BRANCH" == "DBL-48" ]; then
             ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=7 admin@136.49.185.195 << 'EOF'
-cd HellowLabBackend_Django
-echo "Using existing .env file (this does not check that the file exists, please ensure it does before running this script)"
+          cd HellowLabBackend_Django
+          echo "Using existing .env file (this does not check that the file exists, please ensure it does before running this script)"
 
-git checkout DBL-48
+          git checkout DBL-48
 
-git pull origin DBL-48
-echo "Deploying to integration/test environment using .dev.yml file"
-sudo docker compose -f docker-compose.dev.yml up -d --build --remove-orphans
-EOF
+          git pull origin DBL-48
+          echo "Deploying to integration/test environment using .dev.yml file"
+          sudo docker compose -f docker-compose.dev.yml up -d --build --remove-orphans
+          EOF
           fi
           
