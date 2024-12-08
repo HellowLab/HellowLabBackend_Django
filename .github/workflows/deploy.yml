@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - integration
+      - DBL-48
 
 jobs:
   deploy:
