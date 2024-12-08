@@ -184,7 +184,7 @@ REST_AUTH = {
     "PASSWORD_RESET_SERIALIZER": "dj_rest_auth.serializers.PasswordResetSerializer",
 }
 
-CSRF_TRUSTED_ORIGINS = ['https://hellowlab.com', 'https://www.hellowlab.com', 'https://dnekcab.hellowlab.com', 'http://localhost:8000']
+CSRF_TRUSTED_ORIGINS = ['https://hellowlab.com', 'https://www.hellowlab.com', 'https://dnekcab.hellowlab.com', 'https://integration.hellowlab.com', 'http://localhost:8000']
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOW_CREDENTIALS = not DEBUG
