@@ -8,13 +8,11 @@ from datetime import datetime
 
 ### User Models ###
 class CustomUser(AbstractUser):
-    company = models.CharField(max_length=30, blank = True, null = True)
-    profile_image = models.ImageField(blank = True, null = True, upload_to="profile_images/")
-    
-    # Customize the user model by specifying the AUTH_USER_MODEL setting
-    class Meta:
-        swappable = 'AUTH_USER_MODEL'
+    profile_picture = models.ImageField(blank=True, null=True, upload_to="profile_pictures/")
+    bio = models.TextField(blank=True, null=True, max_length=500)
 
+    def __str__(self):
+        return self.username
 class FriendRequest(models.Model):
     from_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_friend_requests', on_delete=models.CASCADE)
     to_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_friend_requests', on_delete=models.CASCADE)

@@ -1,10 +1,15 @@
 from django.contrib import admin
-from .models import *
+from django.contrib.auth.admin import UserAdmin
+from .models import CustomUser
 
-# Register your models here.
-class CustomUserAdmin(admin.ModelAdmin): 
-    list_display = (['username','email','first_name','last_name','last_login'])
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    model = CustomUser
 
-admin.site.register(Friendship)
-
-
+    # Add custom fields to the admin form
+    fieldsets = UserAdmin.fieldsets + (
+        (None, {'fields': ('profile_picture', 'bio')}),
+    )
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        (None, {'fields': ('profile_picture', 'bio')}),
+    )

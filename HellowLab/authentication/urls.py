@@ -11,11 +11,10 @@ from rest_framework_simplejwt.views import TokenVerifyView
 from .views import *
 
 urlpatterns = [
-    path("register/", RegisterView.as_view(), name="rest_register"),
-    path("login/", LoginView.as_view(), name="rest_login"),
+    path("register/", CustomRegisterView.as_view(), name="rest_register"),
+    path("login/", CustomLoginView.as_view(), name="custom-login"),
     path("logout/", LogoutView.as_view(), name="rest_logout"),
-    path("user/", UserDetailsView.as_view(), name="rest_user_details"),
-    path("myuser/", MyUserDetailsView.as_view(), name="my_user_details"),
+    path('user-detail/', UserDetailView.as_view(), name='user_detail'), 
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("token/refresh/", get_refresh_view().as_view(), name="token_refresh"),
     path("register/verify-email/", VerifyEmailView.as_view(), name="rest_verify_email"),
