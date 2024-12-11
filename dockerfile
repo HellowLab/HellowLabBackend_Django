@@ -25,4 +25,6 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 EXPOSE 8000
 
 # Command to run the Django application
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Run Gunicorn as the default command
+CMD ["gunicorn", "HellowLab.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
