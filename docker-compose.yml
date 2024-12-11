@@ -10,8 +10,11 @@ services:
       - db
     env_file:
       - .env
+    volumes:
+      - ./HellowLab/media:/app/media
     environment:
       - DEBUG=false
+      - DJANGO_DEBUG=False
       - DJANGO_DB_NAME=hellowlab_db
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
