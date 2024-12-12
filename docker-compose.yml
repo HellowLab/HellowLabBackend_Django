@@ -43,26 +43,44 @@ services:
       - backend
     restart: unless-stopped
 
-  # NGINX Proxy Manager Service
-  nginx-proxy-manager:
-    image: 'jc21/nginx-proxy-manager:latest'
-    container_name: nginx_proxy_manager
+  nginx:
+    image: 'nginx:latest'  # Use the official Nginx image
+    container_name: nginx
     ports:
-      - "80:80"    # HTTP
-      - "443:443"  # HTTPS
-      - "81:81"    # NGINX Proxy Manager UI
-    environment:
-      - DB_SQLITE_FILE=/data/database.sqlite
+      - "80:80"     # HTTP
+      - "443:443"   # HTTPS
     volumes:
-      - ./HellowLab/media:/var/www/media
-      - ./nginx/data:/data
-      - ./nginx/letsencrypt:/etc/letsencrypt
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/sites-enabled:/etc/nginx/conf.d
+      - ./HellowLab/media:/var/www/media         # Mount media folder
+      - ./nginx/data:/data                       # For storing data like logs
+      - ./nginx/letsencrypt:/etc/letsencrypt     # SSL certificates storage (if using HTTPS)
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf # Custom Nginx config
+      # - ./nginx/sites-enabled:/etc/nginx/conf.d  # Mount custom site configs (replace with your own)
     networks:
       - backend
       - frontend
     restart: unless-stopped
+
+
+  # # NGINX Proxy Manager Service
+  # nginx-proxy-manager:
+  #   image: 'jc21/nginx-proxy-manager:latest'
+  #   container_name: nginx_proxy_manager
+  #   ports:
+  #     - "80:80"    # HTTP
+  #     - "443:443"  # HTTPS
+  #     - "81:81"    # NGINX Proxy Manager UI
+  #   environment:
+  #     - DB_SQLITE_FILE=/data/database.sqlite
+  #   volumes:
+  #     - ./HellowLab/media:/var/www/media
+  #     - ./nginx/data:/data
+  #     - ./nginx/letsencrypt:/etc/letsencrypt
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #     # - ./nginx/sites-enabled:/etc/nginx/conf.d ## This is not needed since we are using the default configuration
+  #   networks:
+  #     - backend
+  #     - frontend
+  #   restart: unless-stopped
     
 volumes:
   postgres_data:
