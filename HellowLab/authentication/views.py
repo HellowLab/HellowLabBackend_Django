@@ -110,11 +110,8 @@ class UserDetailView(APIView):
         print("patch request received")
         # Update partial user data
         user = request.user
-        print("user: ", user)
-        print("request.data: ", request.data)
         serializer = CustomUserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
-            print("serializer is valid")
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
