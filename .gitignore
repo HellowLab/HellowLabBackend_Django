@@ -167,3 +167,4 @@ nginx_proxy_data/
 postgres_data/
 HellowLab/profile_images/
 HellowLab/media/
+nginx/ssl/
