@@ -23,7 +23,8 @@ load_dotenv()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # default value for production is set to False
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() == 'true'
+print("DJANGO_DEBUG: ", os.getenv('DJANGO_DEBUG', 'not found...'))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-lyx6a7p7p59(g6j)uia#-i8f26708^q8%_lz*sb7kn)@k(^di!')
@@ -184,7 +185,9 @@ REST_AUTH = {
     "PASSWORD_RESET_SERIALIZER": "dj_rest_auth.serializers.PasswordResetSerializer",
 }
 
-CSRF_TRUSTED_ORIGINS = ['https://hellowlab.com', 'https://www.hellowlab.com', 'https://dnekcab.hellowlab.com', 'https://integration.hellowlab.com', 'http://localhost:8000']
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://hellowlab.com,https://www.hellowlab.com,https://dnekcab.hellowlab.com,https://integration.hellowlab.com,http://localhost:8000').split(',')
+# CSRF_TRUSTED_ORIGINS = ['https://hellowlab.com', 'https://www.hellowlab.com', 'https://dnekcab.hellowlab.com', 'https://integration.hellowlab.com', 'http://localhost:8000', 'https://mangoon.hellowlab.com']
+print(CSRF_TRUSTED_ORIGINS)
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOW_CREDENTIALS = not DEBUG
