@@ -3,15 +3,18 @@ services:
   django:
     container_name: django_hellowlab
     build: .
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    # command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8001:8000"
     depends_on:
       - db
     env_file:
       - .env
+    volumes:
+      - ./HellowLab/media:/app/media
     environment:
       - DEBUG=false
+      - DJANGO_DEBUG=False
       - DJANGO_DB_NAME=hellowlab_db
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}

@@ -161,9 +161,11 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# Database Files
+# User Additions
 nginx_ssl/
 nginx_proxy_data/
+nginx/ssl/
 postgres_data/
 HellowLab/profile_images/
 HellowLab/media/
+nginx/ssl/
