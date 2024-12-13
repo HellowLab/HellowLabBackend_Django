@@ -29,8 +29,8 @@ jobs:
           cd HellowLabBackend_Django
           echo "Creating .env file at HellowLabBackend_Django/.env"
 
-          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" > .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "DJANGO_DEBUG=False" > .env
+          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
           echo "DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }}" >> .env
           echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> .env
           echo "DJANGO_DB_USER=${{ secrets.DJANGO_DB_USER }}" >> .env
