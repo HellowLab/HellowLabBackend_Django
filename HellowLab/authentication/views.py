@@ -211,24 +211,32 @@ class RespondToFriendRequestView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, request_id, action):
+        user = request.user
 
-        # allow the sender to rescind the request
+        # only allow the sender to rescind the request
         if action == "rescind":
-            friend_request = get_object_or_404(FriendRequest, id=request_id, status="pending")
+            # friend_request = get_object_or_404(FriendRequest, id=request_id, status="pending")
+            friend_request = FriendRequest.objects.filter(id=request_id & (Q(sender=user) & (Q(status="pending")))).first()
+            if not friend_request:
+                return Response({"error": "Friend request does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            
             friend_request.rescind()
             return Response({"message": "Friend request rescinded."}, status=status.HTTP_200_OK)
         
-        friend_request = get_object_or_404(FriendRequest, id=request_id, status="pending")
-
+        # friend_request = get_object_or_404(FriendRequest, id=request_id, status="pending")
+        
+        # only allow the receiver to accept or reject the request
+        friend_request = FriendRequest.objects.filter(id=request_id & (Q(receiver=user) & (Q(status="pending")))).first()
+        if not friend_request:
+            return Response({"error": "Friend request does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        
         if action == "accept":
             friend_request.accept()
             return Response({"message": "Friend request accepted."}, status=status.HTTP_200_OK)
         elif action == "reject":
             friend_request.reject()
             return Response({"message": "Friend request rejected."}, status=status.HTTP_200_OK)
-        elif action == "rescind":
-            friend_request.rescind()
-            return Response({"message": "Friend request rescinded."}, status=status.HTTP_200_OK)
+
         else:
             return Response({"error": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -259,52 +267,3 @@ class RemoveFriendView(APIView):
 
         friendship.delete()
         return Response({"message": "Friend removed."}, status=status.HTTP_200_OK)
-
-# Update friendship status
-# class FriendshipView(APIView):
-#     permission_classes = [IsAuthenticated] # user must have a valid bearer token to make this request
-
-#     # POST request to add a new friend/request
-#     def post(self, request):
-#         print("entered post)")
-
-#         # Fetch the user based on the userID using the custom user model
-#         user2 = get_object_or_404(User, id=request.data.user2)
-
-#         serializer = FriendshipSerializer(data=request.data)
-
-#         print("serializer processed")
-#         if serializer.is_valid():
-#             serializer.save(user1=self.request.user, user2=user2)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# class FriendRequestViewSet(viewsets.ModelViewSet):
-#     serializer_class = FriendRequestSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def get_queryset(self):
-#         return FriendRequest.objects.filter(to_user=self.request.user)
-
-#     def perform_create(self, serializer):
-#         serializer.save(from_user=self.request.user)
-
-#     def update(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         if instance.to_user != request.user:
-#             return Response({"error": "You can't accept this friend request."}, status=status.HTTP_400_BAD_REQUEST)
-
-#         instance.accepted = True
-#         instance.save()
-
-#         # Create a Friendship when the request is accepted
-#         Friendship.objects.create(user1=instance.from_user, user2=instance.to_user)
-#         return Response(FriendRequestSerializer(instance).data)
-
-# class FriendshipViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = FriendshipSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def get_queryset(self):
-#         user = self.request.user
-#         return Friendship.objects.filter(user1=user) | Friendship.objects.filter(user2=user)
