@@ -58,29 +58,39 @@ class CustomUserSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'email', 'username', 'pk', 'bio', 'profile_picture']
         read_only_fields = ['pk', 'username']  # Prevent these from being updated
 
-
 class FriendRequestSerializer(serializers.ModelSerializer):
-    from_user = serializers.ReadOnlyField(source='from_user.username')
-    to_user = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
-
     class Meta:
         model = FriendRequest
-        fields = ['id', 'from_user', 'to_user', 'timestamp', 'accepted']
-
-    def validate(self, attrs):
-        request = self.context.get('request')
-        to_user = attrs.get('to_user')
-        if FriendRequest.objects.filter(from_user=request.user, to_user=to_user).exists():
-            raise serializers.ValidationError("Friend request already sent.")
-        if Friendship.objects.filter(user1=request.user, user2=to_user).exists() or Friendship.objects.filter(user1=to_user, user2=request.user).exists():
-            raise serializers.ValidationError("You are already friends with this user.")
-        return attrs
+        fields = ['id', 'sender', 'receiver', 'status', 'created_at']
 
 class FriendshipSerializer(serializers.ModelSerializer):
-    user1 = serializers.ReadOnlyField(source='user1.username')
-    # user2 = serializers.ReadOnlyField(source='user2.username')
-
     class Meta:
         model = Friendship
-        fields = '__all__'
-        # read_only_fields = ['user1', 'user2']
+        fields = ['id', 'user1', 'user2', 'created_at']
+
+
+# class FriendRequestSerializer(serializers.ModelSerializer):
+#     from_user = serializers.ReadOnlyField(source='from_user.username')
+#     to_user = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
+
+#     class Meta:
+#         model = FriendRequest
+#         fields = ['id', 'from_user', 'to_user', 'timestamp', 'accepted']
+
+#     def validate(self, attrs):
+#         request = self.context.get('request')
+#         to_user = attrs.get('to_user')
+#         if FriendRequest.objects.filter(from_user=request.user, to_user=to_user).exists():
+#             raise serializers.ValidationError("Friend request already sent.")
+#         if Friendship.objects.filter(user1=request.user, user2=to_user).exists() or Friendship.objects.filter(user1=to_user, user2=request.user).exists():
+#             raise serializers.ValidationError("You are already friends with this user.")
+#         return attrs
+
+# class FriendshipSerializer(serializers.ModelSerializer):
+#     user1 = serializers.ReadOnlyField(source='user1.username')
+#     # user2 = serializers.ReadOnlyField(source='user2.username')
+
+#     class Meta:
+#         model = Friendship
+#         fields = '__all__'
+#         # read_only_fields = ['user1', 'user2']

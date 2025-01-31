@@ -1,6 +1,6 @@
 # authentication/urls.py
 
-from authentication.views import email_confirm_redirect, password_reset_confirm_redirect, FriendshipView
+from authentication.views import email_confirm_redirect, password_reset_confirm_redirect
 from dj_rest_auth.registration.views import (ResendEmailVerificationView,VerifyEmailView,)
 from dj_rest_auth.views import (PasswordResetConfirmView, PasswordResetView, )
 from dj_rest_auth.jwt_auth import get_refresh_view
@@ -26,7 +26,14 @@ urlpatterns = [
     ),
     path("password/reset/confirm/", PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
 
-    path("friendrequest/", FriendshipView.as_view(), name="friend_request"),
+    # path("friendrequest/", FriendshipView.as_view(), name="friend_request"),
     path('delete-account/', delete_account, name='delete_account'),
+ 
+    path("search-users/", search_users, name="search_users"),
+    path('send-request/<int:receiver_id>/', SendFriendRequestView.as_view(), name='send-friend-request'),
+    path('respond-request/<int:request_id>/<str:action>/', RespondToFriendRequestView.as_view(), name='respond-friend-request'),
+    path('list-requests/', ListFriendRequestsView.as_view(), name='list-friend-requests'),
+    path('friends/', ListFriendsView.as_view(), name='list-friends'),
+    path('remove-friend/<int:friend_id>/', RemoveFriendView.as_view(), name='remove-friend'),
 
 ]

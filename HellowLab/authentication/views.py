@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.generics import CreateAPIView
+from rest_framework import generics, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets, status
@@ -22,6 +22,8 @@ from django.core.mail import send_mail
 from django.core.signing import Signer, BadSignature
 from dj_rest_auth.registration.views import RegisterView
 from dj_rest_auth.views import LogoutView, LoginView
+from django.views.decorators.http import require_GET
+from django.db.models import Q
 
 
 import json
@@ -152,52 +154,157 @@ def delete_account(request):
 
 ##### FREINDSHIP VIEWS #####
 
+@require_GET
+def search_users(request):
+    query = request.GET.get("q", "")  # Get the search query from request parameters
+    if not query:
+        return JsonResponse({"error": "Query parameter 'q' is required"}, status=400)
+    
+    # sort by usernames that start with the query, limit to 10 (obsolete)
+    # users = User.objects.filter(username__istartswith=query).order_by("username")[:10]
 
-# Update friendship status
-class FriendshipView(APIView):
-    permission_classes = [IsAuthenticated] # user must have a valid bearer token to make this request
+    # sort by usernames that contain the query, limit to 10, sort by username length
+    users = sorted(
+        User.objects.filter(username__istartswith=query),
+        key=lambda user: len(user.username)
+    )[:10]
 
-    # POST request to add a new friend/request
-    def post(self, request):
-        print("entered post)")
+    # TODO: list the number of shared friends between the authenticated user and the searched for user
+    # shared_friends = [Friendship.objects.filter(user1=request.user, user2=user) for user in users]
+    # print(shared_friends)
 
-        # Fetch the user based on the userID using the custom user model
-        user2 = get_object_or_404(User, id=request.data.user2)
+    user_list = [{"id": user.id, "username": user.username, "name": user.get_full_name() , "profile_picture": user.profile_picture.url if user.profile_picture else None} for user in users]  
 
-        serializer = FriendshipSerializer(data=request.data)
+    return JsonResponse({"users": user_list})
 
-        print("serializer processed")
-        if serializer.is_valid():
-            serializer.save(user1=self.request.user, user2=user2)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class SendFriendRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-class FriendRequestViewSet(viewsets.ModelViewSet):
-    serializer_class = FriendRequestSerializer
-    permission_classes = [IsAuthenticated]
+    def post(self, request, receiver_id):
+        sender = request.user
+        receiver = get_object_or_404(User, id=receiver_id)
 
-    def get_queryset(self):
-        return FriendRequest.objects.filter(to_user=self.request.user)
+        if sender == receiver:
+            return Response({"error": "You cannot send a friend request to yourself."}, status=status.HTTP_400_BAD_REQUEST)
 
-    def perform_create(self, serializer):
-        serializer.save(from_user=self.request.user)
+        # Check if a request already exists
+        existing_request = FriendRequest.objects.filter(sender=sender, receiver=receiver, status="pending").exists()
+        if existing_request:
+            return Response({"error": "Friend request already sent."}, status=status.HTTP_400_BAD_REQUEST)
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.to_user != request.user:
-            return Response({"error": "You can't accept this friend request."}, status=status.HTTP_400_BAD_REQUEST)
+        friend_request = FriendRequest.objects.create(sender=sender, receiver=receiver)
+        return Response(FriendRequestSerializer(friend_request).data, status=status.HTTP_201_CREATED)
 
-        instance.accepted = True
-        instance.save()
+class ListFriendRequestsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-        # Create a Friendship when the request is accepted
-        Friendship.objects.create(user1=instance.from_user, user2=instance.to_user)
-        return Response(FriendRequestSerializer(instance).data)
+    def get(self, request):
+        # Get all pending friend requests for the authenticated user as the receiver or sender
+        friend_requests = FriendRequest.objects.filter(
+            Q(receiver=request.user) | Q(sender=request.user),
+            status="pending"
+        )
+        serializer = FriendRequestSerializer(friend_requests, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class FriendshipViewSet(viewsets.ReadOnlyModelViewSet):
+class RespondToFriendRequestView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, request_id, action):
+
+        # allow the sender to rescind the request
+        if action == "rescind":
+            friend_request = get_object_or_404(FriendRequest, id=request_id, status="pending")
+            friend_request.rescind()
+            return Response({"message": "Friend request rescinded."}, status=status.HTTP_200_OK)
+        
+        friend_request = get_object_or_404(FriendRequest, id=request_id, status="pending")
+
+        if action == "accept":
+            friend_request.accept()
+            return Response({"message": "Friend request accepted."}, status=status.HTTP_200_OK)
+        elif action == "reject":
+            friend_request.reject()
+            return Response({"message": "Friend request rejected."}, status=status.HTTP_200_OK)
+        elif action == "rescind":
+            friend_request.rescind()
+            return Response({"message": "Friend request rescinded."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ListFriendsView(generics.ListAPIView):
     serializer_class = FriendshipSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         return Friendship.objects.filter(user1=user) | Friendship.objects.filter(user2=user)
+
+# remove a friends
+class RemoveFriendView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, friend_id):
+        user = request.user
+        friend = get_object_or_404(User, id=friend_id)
+
+        # Check if the friendship exists
+        friendship = Friendship.objects.filter(
+            (Q(user1=user) & Q(user2=friend)) | (Q(user1=friend) & Q(user2=user))
+        ).first()
+
+        if not friendship:
+            return Response({"error": "Friendship does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+
+        friendship.delete()
+        return Response({"message": "Friend removed."}, status=status.HTTP_200_OK)
+
+# Update friendship status
+# class FriendshipView(APIView):
+#     permission_classes = [IsAuthenticated] # user must have a valid bearer token to make this request
+
+#     # POST request to add a new friend/request
+#     def post(self, request):
+#         print("entered post)")
+
+#         # Fetch the user based on the userID using the custom user model
+#         user2 = get_object_or_404(User, id=request.data.user2)
+
+#         serializer = FriendshipSerializer(data=request.data)
+
+#         print("serializer processed")
+#         if serializer.is_valid():
+#             serializer.save(user1=self.request.user, user2=user2)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class FriendRequestViewSet(viewsets.ModelViewSet):
+#     serializer_class = FriendRequestSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_queryset(self):
+#         return FriendRequest.objects.filter(to_user=self.request.user)
+
+#     def perform_create(self, serializer):
+#         serializer.save(from_user=self.request.user)
+
+#     def update(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         if instance.to_user != request.user:
+#             return Response({"error": "You can't accept this friend request."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         instance.accepted = True
+#         instance.save()
+
+#         # Create a Friendship when the request is accepted
+#         Friendship.objects.create(user1=instance.from_user, user2=instance.to_user)
+#         return Response(FriendRequestSerializer(instance).data)
+
+# class FriendshipViewSet(viewsets.ReadOnlyModelViewSet):
+#     serializer_class = FriendshipSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_queryset(self):
+#         user = self.request.user
+#         return Friendship.objects.filter(user1=user) | Friendship.objects.filter(user2=user)
